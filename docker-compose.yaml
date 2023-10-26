@@ -1,0 +1,41 @@
+version: '1.0'
+services:
+#  app:
+#    build:
+#      context: ./
+#      dockerfile: Dockerfile
+#    container_name: app
+#    depends_on:
+#      - db
+#    environment:
+#      - SPRING_DATASOURCE_URL=jdbc:postgresql://employee-training-postgresql:5432/employee_training
+#      - SPRING_DATASOURCE_USERNAME=postgres
+#      - SPRING_DATASOURCE_PASSWORD=postgres
+#      - TZ=Asia/Jakarta
+#    ports:
+#      - "8081:8080"
+
+  db:
+    image: 'postgres:15.1-alpine'
+    container_name: employee-training-postgresql
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5433:5432'
+    volumes:
+      - db:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    depends_on:
+      - db
+    ports:
+      - "5555:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: pgadmin4@pgadmin.org
+      PGADMIN_DEFAULT_PASSWORD: admin
+
+volumes:
+  db:
+    driver: local
