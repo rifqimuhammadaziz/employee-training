@@ -1,0 +1,340 @@
+{
+	"info": {
+		"_postman_id": "46d6b6fb-9134-4d44-9fae-ea76dd79146c",
+		"name": "employee-training",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json",
+		"_exporter_id": "9279135"
+	},
+	"item": [
+		{
+			"name": "karyawan",
+			"item": [
+				{
+					"name": "Get All",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nama\": \"syarini\",\n    \"dob\": \"1996-01-01\",\n    \"status\": \"active\",\n    \"alamat\": \"jakarta\",\n    \"detailKaryawan\": {\n        \"nik\": \"123455\",\n        \"npwp\": \"12345677\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/karyawans/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Get By ID",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nama\": \"syarini\",\n    \"dob\": \"1996-01-01\",\n    \"status\": \"active\",\n    \"alamat\": \"jakarta\",\n    \"detailKaryawan\": {\n        \"nik\": \"123455\",\n        \"npwp\": \"12345677\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/karyawans/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Save",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nama\": \"syarini\",\n    \"dob\": \"1996-01-01\",\n    \"status\": \"active\",\n    \"alamat\": \"jakarta\",\n    \"detailKaryawan\": {\n        \"nik\": \"123455\",\n        \"npwp\": \"12345677\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/karyawans"
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 2,\n    \"nama\": \"Rifqi Muhammad\",\n    \"dob\": \"1999-05-21\",\n    \"status\": \"active\",\n    \"alamat\": \"Tegal Timur\",\n    \"detailKaryawan\": {\n        \"nik\": \"337633763376\",\n        \"npwp\": \"001001001\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/karyawans"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/karyawans"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "rekening",
+			"item": [
+				{
+					"name": "Get All",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:8080/api/v1/rekenings"
+					},
+					"response": []
+				},
+				{
+					"name": "Get By ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:8080/api/v1/rekenings/1"
+					},
+					"response": []
+				},
+				{
+					"name": "Save",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"nama\": \"Rifqi Muhammad Aziz\",\n    \"jenis\": \"BNI\",\n    \"rekening\": \"12345678\",\n    \"alamat\": \"Tegal\",\n    \"karyawan\": {\n        \"id\": \"3\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/rekenings"
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1,\n    \"nama\": \"Rifqi Muhammad Aziz Edited\",\n    \"jenis\": \"BNI\",\n    \"rekening\": \"12345678\",\n    \"alamat\": \"Tegal\",\n    \"karyawan\": {\n        \"id\": \"3\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/rekenings"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/rekenings/delete"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "training",
+			"item": [
+				{
+					"name": "Get All",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:8080/api/v1/trainings"
+					},
+					"response": []
+				},
+				{
+					"name": "Get By ID",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Save",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tema\": \"JAVA DEVELOPER\",\n    \"pengajar\": \"RIFQI MUHAMMAD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/trainings"
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n \"nama\": \"Rifqi Muhammad Aziz\",\n \"jenis\": \"BNI\",\n \"rekening\": \"12345678\",\n \"alamat\": \"Tegal\",\n \"karyawan\": {\n \"id\": \"1\"\n }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/trainings"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/rekenings/delete"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "karyawan-training",
+			"item": [
+				{
+					"name": "Get All",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": "localhost:8080/api/v1/trainings"
+					},
+					"response": []
+				},
+				{
+					"name": "Get By ID",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				},
+				{
+					"name": "Save",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"tema\": \"JAVA DEVELOPER\",\n    \"pengajar\": \"RIFQI MUHAMMAD\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/trainings"
+					},
+					"response": []
+				},
+				{
+					"name": "Update",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n \"nama\": \"Rifqi Muhammad Aziz\",\n \"jenis\": \"BNI\",\n \"rekening\": \"12345678\",\n \"alamat\": \"Tegal\",\n \"karyawan\": {\n \"id\": \"1\"\n }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/trainings"
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": "localhost:8080/api/v1/karyawan-trainings"
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
