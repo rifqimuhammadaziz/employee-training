@@ -1,6 +1,6 @@
 package com.rifqimuhammadaziz.employeetraining.model.entity;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -17,7 +17,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "karyawan")
-public class Karyawan extends Timestamps implements Serializable {
+public class Karyawan extends AuditClass implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

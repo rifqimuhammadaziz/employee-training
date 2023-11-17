@@ -1,6 +1,6 @@
 package com.rifqimuhammadaziz.employeetraining.model.entity;
 
-import jakarta.persistence.*;
+import javax.persistence.*;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -13,7 +13,7 @@ import java.util.Date;
 @RequiredArgsConstructor
 @Entity
 @Table(name = "rekening")
-public class Rekening extends Timestamps implements Serializable {
+public class Rekening extends AuditClass implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

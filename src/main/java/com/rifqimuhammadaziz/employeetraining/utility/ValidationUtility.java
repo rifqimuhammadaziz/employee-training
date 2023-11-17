@@ -1,7 +1,7 @@
 package com.rifqimuhammadaziz.employeetraining.utility;
 
-import jakarta.validation.ConstraintViolationException;
-import jakarta.validation.Validator;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 

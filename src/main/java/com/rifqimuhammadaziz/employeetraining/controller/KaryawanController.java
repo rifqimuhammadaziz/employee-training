@@ -6,7 +6,7 @@ import com.rifqimuhammadaziz.employeetraining.model.request.UpdateKaryawanReques
 import com.rifqimuhammadaziz.employeetraining.model.response.GeneralResponse;
 import com.rifqimuhammadaziz.employeetraining.model.response.KaryawanResponse;
 import com.rifqimuhammadaziz.employeetraining.service.KaryawanService;
-import jakarta.validation.Valid;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
