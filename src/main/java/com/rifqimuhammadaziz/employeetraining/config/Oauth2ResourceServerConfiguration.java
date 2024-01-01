@@ -25,16 +25,49 @@ public class Oauth2ResourceServerConfiguration extends ResourceServerConfigurerA
                 .disable()
                 .antMatcher("/**")
                 .authorizeRequests()
-                .antMatchers("/","/showFile/**","/v1/showFile/**","/v1/upload",
-                        "/user-register/**","/swagger-ui/**","/swagger-ui.html","/v2/api-docs/**",
-                        "/swagger-resources/**","/user-login/**", "/forgot-password/**",
-                        "/oauth/authorize**", "/login**", "/error**","/tester/**")
+                .antMatchers(
+                        "/",
+                        "/showFile/**",
+                        "/v1/showFile/**",
+                        "/v1/upload",
+                        "/user-register/**",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/swagger-ui.html",
+                        "/v2/api-docs/**",
+                        "/swagger-resources/**",
+                        "/configuration/security",
+                        "/configuration/**",
+                        "/actuator",
+                        "/user-login/**",
+                        "/forgot-password/**",
+                        "/oauth/token",
+                        "/oauth/authorize**",
+                        "/login**",
+                        "/error**",
+                        "/tester/**",
+                        "/api/v1/user-register/register",
+                        "/web/user-register/**",
+                        "/api/v1/user-register/register-confirm-otp/**",
+                        "/api/v1/user-register/send-otp",
+                        "/api/v1/user-login/login"
+                )
                 .permitAll()
-                .antMatchers("/v1/karyawan/**","/v1/taining/**","/v1/rekening/**",
-                        "/v1/karyawan-training/**","/v1/karyawan/**","/v1/upload")
+                .antMatchers(
+                        "/api/v1/karyawans/**",
+                        "/api/v1/trainings/**",
+                        "/api/v1/rekenings/**",
+                        "/api/v1/karyawan-trainings/**",
+                        "/api/v1/upload"
+                )
                 .hasAnyAuthority("ROLE_ADMIN","ROLE_SUPERUSER")
-                .antMatchers("/v1/karyawan/list","/v1/taining/list","/v1/rekening/list",
-                        "/v1/karyawan-training/list","/v1/karyawan/list","/v1/upload")
+                .antMatchers(
+                        "/api/v1/karyawans",
+                        "/api/v1/trainings",
+                        "/api/v1/rekenings",
+                        "/api/v1/karyawan-trainings",
+                        "/api/v1/upload"
+                )
                 .hasAnyAuthority("ROLE_USER")
                 .and()
                 .authorizeRequests()

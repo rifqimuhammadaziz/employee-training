@@ -7,6 +7,8 @@ import com.rifqimuhammadaziz.employeetraining.model.response.GeneralResponse;
 import com.rifqimuhammadaziz.employeetraining.model.response.KaryawanResponse;
 import com.rifqimuhammadaziz.employeetraining.service.KaryawanService;
 import javax.validation.Valid;
+
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/api/v1/karyawans")
 @RequiredArgsConstructor
+@SecurityRequirement(name = "Bearer Authentication")
 public class KaryawanController {
 
     private final KaryawanService karyawanService;

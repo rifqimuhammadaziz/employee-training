@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5433/employee_training
+    url: jdbc:postgresql://monorail.proxy.rlwy.net:42490/railway
     username: postgres
-    password: postgres
+    password: g*6c6fd46D-bgb*dbA-GFB5EG1cDEaE2
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -10,8 +10,52 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+  #    show-sql: true
+  main:
+    allow-circular-references: true
+    allow-bean-definition-overriding: true
+
+  # email
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: youremail@mail.com
+    password: generateInGoogle
+    sender:
+      name: admin
+      email: no-reply@test.com
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
 springdoc:
-  api-docs:
-    path: /api-docs
+  packages-to-scan: com.rifqimuhammadaziz.employeetraining.controller
   swagger-ui:
     path: /
+    disable-swagger-default-url: true
+
+security:
+  jwt:
+    enabled: true
+    secret_key: s3cr3t
+  bcrypt:
+    cost: 13
+
+app:
+  uploadto:
+    cdn: "./cdn/"
+
+BASE_URL: http://localhost:8080
+
+cron:
+  expression: '0 0 0 */14 * *'

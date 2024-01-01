@@ -5,7 +5,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.core.task.TaskExecutor;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Component;
@@ -13,13 +15,12 @@ import org.springframework.util.StringUtils;
 
 import javax.mail.internet.MimeMessage;
 
-@Component("emailSender")
 @SuppressWarnings({"WeakerAccess", "ConstantConditions"})
+@Component("emailSender")
 public class EmailSender {
     private final static Logger logger = LoggerFactory.getLogger(EmailSender.class);
 
-    @Autowired
-    private JavaMailSenderImpl mailSender;
+    private final JavaMailSender mailSender;
 
     @Value("${spring.mail.sender.name:}")
     private String senderName;
@@ -27,9 +28,12 @@ public class EmailSender {
     @Value("${spring.mail.sender.mail:}")
     private String senderEmail;
 
-    @Qualifier("taskExecutor")
-    @Autowired
-    private TaskExecutor taskExecutor;
+    private final TaskExecutor taskExecutor;
+
+    public EmailSender(JavaMailSender mailSender, @Qualifier("taskExecutor") TaskExecutor taskExecutor) {
+         this.mailSender = mailSender;
+         this.taskExecutor = taskExecutor;
+    }
 
     public boolean send(String email, String subject, String message) {
         return send(null, email, subject, message);

@@ -1,5 +1,7 @@
 package com.rifqimuhammadaziz.employeetraining.config;
 
+import com.rifqimuhammadaziz.employeetraining.repository.oauth.UserRepository;
+import com.rifqimuhammadaziz.employeetraining.service.oauth.Oauth2UserDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -16,7 +18,7 @@ import java.util.Map;
 public class Oauth2AccessTokenConverter extends DefaultAccessTokenConverter {
 
     private UserRepository userRepository;
-    private Oauth2UserDetailsService oauth2UserDetailsService;
+    private Oauth2UserDetailsService userDetailsService;
 
     @Override
     public OAuth2Authentication extractAuthentication(Map<String, ?> map) {
