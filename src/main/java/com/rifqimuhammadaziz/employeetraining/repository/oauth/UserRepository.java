@@ -1,11 +1,11 @@
 package com.rifqimuhammadaziz.employeetraining.repository.oauth;
 
 import com.rifqimuhammadaziz.employeetraining.model.oauth.User;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface UserRepository extends PagingAndSortingRepository<User, Long> {
-    @Query("FROM User u WHERE LOWER(u.username) = LOWER(?1)")
+public interface UserRepository extends JpaRepository<User, Long> {
     User findOneByUsername(String username);
     @Query("FROM User u WHERE u.otp = ?1")
     User findOneByOTP(String otp);

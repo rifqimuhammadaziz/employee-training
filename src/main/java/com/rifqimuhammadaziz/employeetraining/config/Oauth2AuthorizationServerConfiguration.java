@@ -17,14 +17,15 @@ import org.springframework.security.oauth2.provider.token.TokenStore;
 @Configuration
 @EnableAuthorizationServer
 @RequiredArgsConstructor
+@SuppressWarnings("deprecation")
 public class Oauth2AuthorizationServerConfiguration extends AuthorizationServerConfigurerAdapter {
 
-    private Oauth2ClientDetailsService clientDetailsService;
-    private Oauth2UserDetailsService userDetailsService;
-    private AuthenticationManager authenticationManager;
-    private PasswordEncoder passwordEncoder;
-    private AccessTokenConverter accessTokenConverter;
-    private TokenStore tokenStore;
+    private final Oauth2ClientDetailsService clientDetailsService;
+    private final Oauth2UserDetailsService userDetailsService;
+    private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
+    private final AccessTokenConverter accessTokenConverter;
+    private final TokenStore tokenStore;
 
     @Override
     public void configure(AuthorizationServerSecurityConfigurer server) throws Exception {

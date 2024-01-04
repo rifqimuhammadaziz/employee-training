@@ -1,6 +1,8 @@
 package com.rifqimuhammadaziz.employeetraining.model.oauth;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -13,6 +15,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "oauth_user")
+@Getter
+@Setter
 public class User implements UserDetails, Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -99,10 +103,6 @@ public class User implements UserDetails, Serializable {
 
     public void setUsername(String username) {
         this.username = username;
-    }
-
-    public String getFullname() {
-        return fullname;
     }
 
     public void setFullname(String fullname) {

@@ -1,7 +1,7 @@
 package com.rifqimuhammadaziz.employeetraining.service.oauth;
 
 import com.rifqimuhammadaziz.employeetraining.repository.oauth.ClientRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.oauth2.provider.ClientDetails;
 import org.springframework.security.oauth2.provider.ClientDetailsService;
@@ -9,18 +9,19 @@ import org.springframework.security.oauth2.provider.ClientRegistrationException;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
+@SuppressWarnings("deprecation")
 public class Oauth2ClientDetailsService implements ClientDetailsService {
-    @Autowired
-    private ClientRepository clientRepository;
+
+    private final ClientRepository clientRepository;
 
     @Override
     public ClientDetails loadClientByClientId(String s) throws ClientRegistrationException {
-        ClientDetails client =
-                clientRepository.findOneByClientId(s);
-        if (null == client) {
+        ClientDetails clientDetails = clientRepository.findOneByClientId(s);
+        if (clientDetails == null) {
             throw new ClientRegistrationException("Client not found");
         }
-        return client;
+        return clientDetails;
     }
 
     @CacheEvict("oauth_client_id")

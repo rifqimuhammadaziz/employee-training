@@ -13,12 +13,12 @@ import java.util.Collection;
 import java.util.Map;
 
 @Component
-@SuppressWarnings("unchecked")
 @RequiredArgsConstructor
+@SuppressWarnings({"unchecked", "deprecation"})
 public class Oauth2AccessTokenConverter extends DefaultAccessTokenConverter {
 
-    private UserRepository userRepository;
-    private Oauth2UserDetailsService userDetailsService;
+    private final UserRepository userRepository;
+    private final Oauth2UserDetailsService userDetailsService;
 
     @Override
     public OAuth2Authentication extractAuthentication(Map<String, ?> map) {

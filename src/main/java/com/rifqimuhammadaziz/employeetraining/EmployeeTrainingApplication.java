@@ -1,6 +1,6 @@
 package com.rifqimuhammadaziz.employeetraining;
 
-import com.rifqimuhammadaziz.employeetraining.controller.uploadfile.FileStorageProperties;
+import com.rifqimuhammadaziz.employeetraining.config.properties.FileStorageProperties;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;

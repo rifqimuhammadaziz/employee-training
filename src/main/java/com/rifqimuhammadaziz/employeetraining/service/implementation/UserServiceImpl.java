@@ -1,198 +1,355 @@
 package com.rifqimuhammadaziz.employeetraining.service.implementation;
 
-import com.rifqimuhammadaziz.employeetraining.config.AppConfig;
-import com.rifqimuhammadaziz.employeetraining.model.dao.LoginModel;
-import com.rifqimuhammadaziz.employeetraining.model.dao.RegisterModel;
+import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
+import com.google.api.client.googleapis.json.GoogleJsonResponseException;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.services.oauth2.Oauth2;
+import com.google.api.services.oauth2.model.Userinfoplus;
+import com.rifqimuhammadaziz.employeetraining.exception.*;
 import com.rifqimuhammadaziz.employeetraining.model.oauth.Role;
 import com.rifqimuhammadaziz.employeetraining.model.oauth.User;
+import com.rifqimuhammadaziz.employeetraining.model.request.EmailRegister;
+import com.rifqimuhammadaziz.employeetraining.model.request.LoginRequest;
+import com.rifqimuhammadaziz.employeetraining.model.request.RegisterRequest;
+import com.rifqimuhammadaziz.employeetraining.model.request.ResetPasswordRequest;
+import com.rifqimuhammadaziz.employeetraining.model.response.EmailResponse;
+import com.rifqimuhammadaziz.employeetraining.model.response.LoginResponse;
 import com.rifqimuhammadaziz.employeetraining.repository.oauth.RoleRepository;
 import com.rifqimuhammadaziz.employeetraining.repository.oauth.UserRepository;
 import com.rifqimuhammadaziz.employeetraining.service.UserService;
-import com.rifqimuhammadaziz.employeetraining.service.oauth.Oauth2UserDetailsService;
-import com.rifqimuhammadaziz.employeetraining.utility.TemplateResponse;
+import com.rifqimuhammadaziz.employeetraining.service.email.EmailSender;
+import com.rifqimuhammadaziz.employeetraining.utility.DateConverter;
+import com.rifqimuhammadaziz.employeetraining.utility.EmailTemplate;
+import com.rifqimuhammadaziz.employeetraining.utility.SimpleStringUtils;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.util.*;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
 
+    private final RoleRepository oAuthRoleRepository;
+    private final UserRepository oAuthUserRepository;
+    private final UserDetailsService oAuth2UserDetailsService;
+    private final PasswordEncoder passwordEncoder;
+    private final RestTemplateBuilder restTemplateBuilder;
+    private final EmailTemplate emailTemplate;
+    private final EmailSender emailSender;
+    private final DateConverter dateConverter;
 
-    AppConfig config = new AppConfig();
-    private static final Logger logger = LoggerFactory.getLogger(UserServiceImpl.class);
-    @Autowired
-    RoleRepository roleRepository;
+    @Value("1200")//set minute expired token
+    private int expiredToken;
 
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    private Oauth2UserDetailsService userDetailsService;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    public TemplateResponse templateResponse;
-
-    @Value("${BASEURL}")
+    @Value("${BASE_URL}")
     private String baseUrl;
 
-    @Autowired
-    private RestTemplateBuilder restTemplateBuilder;
-
 
     @Override
-    public Map register(RegisterModel registerModel) {
-        Map map = new HashMap();
+    public User register(RegisterRequest registerRequest) {
+        if (!registerRequest.getPassword().equals(registerRequest.getConfirmPassword())) {
+            log.error("Passwords must be the same");
+            throw new NotMatchPasswordException("Passwords must be the same");
+        }
 
-        try {
+        User user = oAuthUserRepository.checkExistingEmail(registerRequest.getEmail());
 
-            if(userRepository.checkExistingEmail(registerModel.getEmail()) != null) {
-                log.error("Email Already Exists");
-                return templateResponse.Error("Email Already Exists","400");
-            }if (!templateResponse.isValidEmail(registerModel.getEmail())) {
-                log.error("Email Tidak Valid");
-                return templateResponse.Error("Email Tidak Valid","400");
-            }
-            if (!registerModel.getPassword().equals(registerModel.getConfirmPassword())) {
-                log.error("Passwords must be the same");
-                return templateResponse.Error("Passwords must be the same");
-            }
-            if(registerModel.getPassword().equals("") || registerModel.getPassword().equals(null)) {
-                log.error("password cannot be empty");
-                return templateResponse.Error("password cannot be empty");
-            }
-            if(registerModel.getConfirmPassword().equals("") || registerModel.getConfirmPassword().equals(null)) {
-                log.error("Confirm password cannot be empty");
-                return templateResponse.Error("Confirm password cannot be empty");
-            }
-//            String[] roleNames = {"ROLE_USER", "ROLE_READ", "ROLE_WRITE"}; // admin
-            String[] roleNames = {"ROLE_USER"}; // user
-            User user = new User();
-            user.setUsername(registerModel.getEmail().toLowerCase());
-            user.setFullname(registerModel.getFullName());
-
-            //step 1 :
-            user.setEnabled(false); // matikan user
-
-            String password = passwordEncoder.encode(registerModel.getPassword().replaceAll("\\s+", ""));
-            List<Role> r = roleRepository.findByNameIn(roleNames);
-
-            user.setRoles(r);
-            user.setPassword(password);
-            User obj = userRepository.save(user);
-            log.info("Register Success");
-            return templateResponse.Success(obj);
-        } catch (Exception e) {
-            logger.error("Eror registerManual :", e);
-            return templateResponse.Error("Error : " + e);
+        if (user != null) {
+            log.error("Username already exists");
+            throw new UserAlreadyExistsException("Username already exists");
+        } else {
+            return registerManual(registerRequest);
         }
     }
 
     @Override
-    public Map login(LoginModel loginModel) {
-
+    public LoginResponse login(LoginRequest loginRequest) {
         try {
-            Map<String, Object> map = new HashMap<>();
-            User checkUser = userRepository.findOneByUsername(loginModel.getEmail());
-
-            if (!templateResponse.isValidEmail(loginModel.getEmail())) {
-                log.error("Email Tidak Valid");
-                return templateResponse.Error("Email Tidak Valid");
+            User userChecked = oAuthUserRepository.findOneByUsername(loginRequest.getEmail());
+            if ((userChecked != null) && (passwordEncoder.matches(loginRequest.getPassword(), userChecked.getPassword())) && (!userChecked.isEnabled())) {
+                log.warn("Username is not enabled yet");
+                throw new UserNotActiveException("This account have not enabled, please complete the registration!");
             }
-            if(checkUser == null) {
-                log.error("Email Not Found");
-                return templateResponse.Error("Not Found");
+            if (userChecked == null) {
+                log.warn("User not found");
+                throw new UserNotFoundException("User Not Found");
             }
-            if(loginModel.getPassword().equals("") || loginModel.getPassword().equals(null)) {
-                log.error("password cannot be empty");
-                return templateResponse.Error("password cannot be empty");
+            if (!(passwordEncoder.matches(loginRequest.getPassword(), userChecked.getPassword()))) {
+                log.warn("Wrong password");
+                throw new NotMatchPasswordException("Wrong password");
             }
 
-//            if (checkUser.isBlocked()) {
-//                return response.Error("Your account is blocked, please contact Admin!");
-//            }
-
-            if ((checkUser != null) && (passwordEncoder.matches(loginModel.getPassword(), checkUser.getPassword()))) {
-                if (!checkUser.isEnabled()) {
-                    map.put("is_enabled", checkUser.isEnabled());
-                    return templateResponse.Error(map);
-                }
-            }
-            if (!(passwordEncoder.matches(loginModel.getPassword(), checkUser.getPassword()))) {
-                return templateResponse.Error("Wrong Password");
-            }
-            String url = baseUrl + "/oauth/token?username=" + loginModel.getEmail() +
-                    "&password=" + loginModel.getPassword() +
-                    "&grant_type=password" +
-                    "&client_id=my-client-web" +
-                    "&client_secret=password";
-            ResponseEntity<Map> response = restTemplateBuilder.build().exchange(url, HttpMethod.POST, null, new
-                    ParameterizedTypeReference<Map>() {
-                    });
-
-
-            if (response.getStatusCode() == HttpStatus.OK) {
-                User user = userRepository.findOneByUsername(loginModel.getEmail());
-                List<String> roles = new ArrayList<>();
-
-                for (Role role : user.getRoles()) {
-                    roles.add(role.getName());
-                }
-                //save token
-//                checkUser.setAccessToken(response.getBody().get("access_token").toString());
-//                checkUser.setRefreshToken(response.getBody().get("refresh_token").toString());
-//                userRepository.save(checkUser);
-
-                userRepository.save(user);
-
-
-                map.put("access_token", response.getBody().get("access_token"));
-                map.put("token_type", response.getBody().get("token_type"));
-                map.put("refresh_token", response.getBody().get("refresh_token"));
-                map.put("expires_in", response.getBody().get("expires_in"));
-                map.put("scope", response.getBody().get("scope"));
-                map.put("jti", response.getBody().get("jti"));
-                map.put("user", user);
-
-
-                System.out.println(baseUrl);
-                return templateResponse.Success(map);
+            ResponseEntity<LoginResponse> response = getToken(loginRequest);
+            if (response.getStatusCode().equals(HttpStatus.OK)) {
+                return response.getBody();
             } else {
-                System.out.println(baseUrl);
-                return null;
+                log.warn("User with {} not found", loginRequest.getEmail());
+                throw new UserNotFoundException(String.format("User %s with not found", loginRequest.getEmail()));
             }
-
-        } catch (
-                HttpStatusCodeException e) {
-            e.printStackTrace();
-            if (e.getStatusCode() == HttpStatus.BAD_REQUEST) {
-                return templateResponse.Error("invalid login");
+        } catch (HttpStatusCodeException httpStatusCodeException) {
+            log.error("{}", getClass().getSimpleName(), httpStatusCodeException);
+            if (httpStatusCodeException.getStatusCode() == HttpStatus.BAD_REQUEST) {
+                throw new InvalidLoginException("Invalid login request");
             }
-            return templateResponse.Error(e);
-        } catch (
-                Exception e) {
-            e.printStackTrace();
-
-            return templateResponse.Error(e);
+            throw new UserNotFoundException("Error");
+        } catch (Exception exception) {
+            throw new UserNotFoundException(exception.getMessage());
         }
     }
+
+    @Override
+    public String sendEmailRegister(EmailRegister emailRegister) {
+        User foundUser = oAuthUserRepository.findOneByUsername(emailRegister.getEmail());
+        if (foundUser == null) throw new UserNotFoundException("Email not found");
+
+        String template;
+        if (StringUtils.isEmpty(foundUser.getOtp())) {
+            String otp = generateAndSaveOtp(foundUser);
+            template = setTemplateRegister(foundUser, emailTemplate.getRegisterTemplate(), String.format("http://localhost:8080/web/user-register/index/%s", otp));
+        } else {
+            template = setTemplateRegister(foundUser, emailTemplate.getOTPTemplate(), foundUser.getOtp());
+        }
+        emailSender.sendAsync(foundUser.getUsername(), "Register", template);
+        return "Thanks, please check your email for activation";
+    }
+
+    @Override
+    public String validateToken(String token) {
+        User user = oAuthUserRepository.findOneByOTP(token);
+        if (user == null) throw new NoSuchElementException("Token is not valid");
+        if (user.isEnabled()) return "Your account has been active, please login!";
+
+        String today = dateConverter.convertDateToString(new Date());
+        String dateToken = dateConverter.convertDateToString(user.getOtpExpiredDate());
+        if (Long.parseLong(today) > Long.parseLong(dateToken)) {
+            throw new TokenExpiredException("Your token is expired, please get token again");
+        }
+
+        // enable user
+        user.setEnabled(true);
+        oAuthUserRepository.save(user);
+
+        return "Your account is successfully activated, please login!";
+    }
+
+    @Override
+    public User findUserByOTP(String token) {
+        return oAuthUserRepository.findOneByOTP(token);
+    }
+
+    @Override
+    public void saveUser(User user) {
+        oAuthUserRepository.save(user);
+    }
+
+    @Override
+    public String sendEmailReset(EmailRegister emailRegister) {
+        User foundUser = oAuthUserRepository.findOneByUsername(emailRegister.getEmail());
+        if (foundUser == null) throw new UserNotFoundException("Email not found");
+
+        String template;
+        if (StringUtils.isEmpty(foundUser.getOtp())) {
+            String otp = generateAndSaveOtp(foundUser);
+            template = setTemplateReset(foundUser, emailTemplate.getResetPassword(), otp);
+            oAuthUserRepository.save(foundUser);
+        } else {
+            template = setTemplateReset(foundUser, emailTemplate.getResetPassword(), foundUser.getOtp());
+        }
+        emailSender.sendAsync(foundUser.getUsername(), "Reset Password", template);
+        return "Thanks, please open your email to reset your password";
+    }
+
+    @Override
+    public String resetPassword(ResetPasswordRequest resetPasswordRequest) {
+        String message;
+        User user = oAuthUserRepository.findOneByOTP(resetPasswordRequest.getOtp());
+        if (user == null) throw new NoSuchElementException("Token is not valid");
+        if (!resetPasswordRequest.getNewPassword().equals(resetPasswordRequest.getConfirmPassword())) {
+            log.error("Passwords must be the same");
+            throw new NotMatchPasswordException("Passwords must be the same");
+        }
+
+        user.setPassword(passwordEncoder.encode(resetPasswordRequest.getNewPassword().replaceAll("\\s+", "")));
+        user.setOtpExpiredDate(null);
+        user.setOtp(null);
+
+        try {
+            oAuthUserRepository.save(user);
+            message = "success";
+        } catch (Exception exception) {
+            log.error("Failed to save user", exception);
+            throw new ServerException("Failed to save user");
+        }
+
+        return message;
+    }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public EmailResponse<?> repairGoogleSigninAction(MultiValueMap<String, String> params) throws IOException {
+        Map<String, String> map = params.toSingleValueMap();
+        String accessToken = map.get("accessToken");
+        GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
+        log.info("Access token: {}", accessToken);
+        Oauth2 oauth2 = new Oauth2.Builder(new NetHttpTransport(), new JacksonFactory(), credential)
+                .setApplicationName("Oauth2").build();
+
+        Userinfoplus profile;
+        try {
+            profile = oauth2.userinfo().get().execute();
+        } catch (GoogleJsonResponseException e) {
+            throw new ServerException(e.getDetails().getMessage());
+        }
+
+        profile.toPrettyString();
+        User user = oAuthUserRepository.findOneByUsername(profile.getEmail());
+        if (user != null) {
+            if (!user.isEnabled()) {
+                // send to email register
+                sendEmailRegister(new EmailRegister(user.getUsername()));
+                return new EmailResponse<>(
+                        200,
+                        user,
+                        "register",
+                        "success"
+                );
+            }
+            for (Map.Entry<String, String> req : map.entrySet()) {
+                log.info("key: " + req.getKey());
+                log.info("value: " + req.getValue());
+            }
+
+            LoginRequest loginRequest = new LoginRequest(profile.getEmail(), profile.getId());
+            String oldPassword = user.getPassword();
+            if (!passwordEncoder.matches(profile.getId(), oldPassword)) {
+                user.setPassword(passwordEncoder.encode(profile.getId().replaceAll("\\s+", "")));
+                oAuthUserRepository.save(user);
+            }
+
+            ResponseEntity<LoginResponse> response = getToken(loginRequest);
+            if (response.getStatusCode().equals(HttpStatus.OK)) {
+                // update to old password
+                user.setPassword(oldPassword);
+                oAuthUserRepository.save(user);
+                return new EmailResponse<>(
+                        200,
+                        response.getBody(),
+                        "login",
+                        "sukses"
+                );
+            }
+        } else {
+            RegisterRequest registerRequest = RegisterRequest.builder()
+                    .email(profile.getEmail())
+                    .fullName(profile.getName())
+                    .password(profile.getId())
+                    .confirmPassword(profile.getId())
+                    .build();
+
+            User registeredUser = registerManual(registerRequest);
+            sendEmailRegister(new EmailRegister(profile.getEmail()));
+            return new EmailResponse<>(
+                    200,
+                    registeredUser,
+                    "register",
+                    "sukses"
+            );
+        }
+        return new EmailResponse<>();    }
+
+    private User registerManual(RegisterRequest registerRequest) {
+        User user = new User();
+        List<String> rolesName = List.of("ROLE_USER");
+        user.setUsername(registerRequest.getEmail().toLowerCase());
+        user.setFullname(registerRequest.getFullName());
+        user.setEnabled(false);
+
+        String password = passwordEncoder.encode(registerRequest.getPassword().replaceAll("\\s+", ""));
+        List<Role> roles = oAuthRoleRepository.findByNameIn(rolesName);
+
+        user.setRoles(roles);
+        user.setPassword(password);
+        User savedUser = oAuthUserRepository.save(user);
+        log.info("Successfully saved user");
+        return savedUser;
+    }
+
+    // call oauth api to get token
+    private ResponseEntity<LoginResponse> getToken(LoginRequest loginRequest) {
+        String oauthUrl = String.format("%s/oauth/token", baseUrl);
+        UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromHttpUrl(oauthUrl)
+                .queryParam("username", loginRequest.getEmail())
+                .queryParam("password", loginRequest.getPassword())
+                .queryParam("grant_type", "password")
+                .queryParam("client_id", "my-client-web")
+                .queryParam("client_secret", "password");
+
+        return restTemplateBuilder.build().exchange(
+                uriComponentsBuilder.toUriString(),
+                HttpMethod.POST,
+                null,
+                new ParameterizedTypeReference<>() {
+                }
+        );
+    }
+
+    // generate otp
+    private String generateAndSaveOtp(User user) {
+        User searchedUser;
+        String otp;
+        do {
+            otp = SimpleStringUtils.randomString(6, true);
+            searchedUser = oAuthUserRepository.findOneByOTP(otp);
+        } while (searchedUser != null);
+
+        Date dateNow = new Date();
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(dateNow);
+        calendar.add(Calendar.MINUTE, expiredToken);
+        Date expirationDate = calendar.getTime();
+
+        user.setOtp(otp);
+        user.setOtpExpiredDate(expirationDate);
+        oAuthUserRepository.save(user);
+
+        return otp;
+    }
+
+    // set template to register
+    private String setTemplateRegister(User foundUser, String template, String otp) {
+        template = template.replaceAll("\\{\\{USERNAME}}",
+                (foundUser.getFullname() == null ? foundUser.getUsername() : foundUser.getFullname()));
+        template = template.replaceAll("\\{\\{VERIFY_TOKEN}}", otp);
+        template = template.replaceAll("\\{\\{HOSTMAIL}}", "test@test.com");
+        return template;
+    }
+
+    // set template to reset password
+    private String setTemplateReset(User foundUser, String template, String otp) {
+        template = template.replaceAll("\\{\\{PASS_TOKEN}}",
+                otp);
+        template = template.replaceAll("\\{\\{USERNAME}}",
+                (foundUser.getUsername() == null ? "UserName" : String.format("%s", foundUser.getUsername())));
+        return template;
+    }
+
 }
 
 
