@@ -1,8 +1,9 @@
 spring:
   datasource:
-    url: jdbc:postgresql://monorail.proxy.rlwy.net:42490/railway
+    url: jdbc:postgresql://viaduct.proxy.rlwy.net:18346/railway
+#    url: jdbc:postgresql://localhost:5433/employee_training
     username: postgres
-    password: g*6c6fd46D-bgb*dbA-GFB5EG1cDEaE2
+    password: bABffga1BDBD5-Af55ae2a621-cBA134
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -19,8 +20,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: youremail@mail.com
-    password: generateInGoogle
+    username: sample@mail.com
+    password: password
     sender:
       name: admin
       email: no-reply@test.com
